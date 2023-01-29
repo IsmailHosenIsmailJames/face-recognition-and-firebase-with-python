@@ -11,6 +11,6 @@ I have build 5 python script that for different functionality. The functionality
 
 Also I have build an App , the work flow of this App is pretty simple. The students and the parents (guardians) both can create their account. The user will upload profile photo and all required information when they creating account.
 
-More features will in process and developed after the Examination.
+More features will in process and developed.
 
 I just need some motivation.

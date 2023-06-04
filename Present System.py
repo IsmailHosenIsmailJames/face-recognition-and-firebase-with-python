@@ -10,7 +10,7 @@ from firebase_admin import credentials,firestore
 
 
 # initialize firebase server
-cd = credentials.Certificate("tpi-student-database-15c14-firebase-adminsdk-fkfla-12512f7f93.json")
+cd = credentials.Certificate("face-recognition-tpi-firebase-adminsdk-e9cby-d555dca55d.json")
 firebase_admin.initialize_app(cd)
 datab = firestore.client()
 usersref = datab.collection(u'all user')
@@ -84,7 +84,8 @@ json = room_routine.routine()
 with mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence= 0.5) as face_detection:
     while (camera_311.isOpened()):
         now = time.ctime().split(' ')
-        minutes = now[3].split(':')
+        minutes = now[4].split(':')
+        print(minutes, "\n", now)
         minutes = int(minutes[0])*60 + int(minutes[1])
         # trying to upgrading the system
         details_of_camera = ((camera_311, 311),)
@@ -96,7 +97,9 @@ with mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence
                 end_time = subject['end_time']
                 # load all data
                 if(start_time <= minutes <= end_time):
-                    present_file_path = f"present data/{now[4]}_{now[1]}_{now[2]}_{now[0]}/{subject['shift']}/{subject['deperment']}/{subject['semester']}/{subject['group']}/"
+                    
+                    present_file_path = f"present data/{now[5]}_{now[1]}_{now[3]}_{now[0]}/{subject['shift']}/{subject['deperment']}/{subject['semester']}/{subject['group']}/"
+                    print(present_file_path)
                     try: os.makedirs(present_file_path)
                     except: None
                     face, names, roll, reg , emails = load_data(subject=subject)
@@ -107,8 +110,11 @@ with mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence
                     results = face_detection.process(image)
                     image.flags.writeable = True
                     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+
                     if results.detections:
                         for detection in results.detections:
+                            sname = ""
+                            sroll = ""
                             face_data = detection.location_data.relative_bounding_box
                             img_shape = image.shape
                             # make image smaller for better performence
@@ -121,8 +127,8 @@ with mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence
                             if ymin < 0: ymin = 0
                             if xmax > img_shape[0]: xmax = img_shape[1] - 1
                             if ymax > img_shape[1]: ymax = img_shape[0] - 1
-                            # croped_image = cv2.resize(image[ymin:ymax,xmin:xmax], (0, 0), fx=0.75, fy=0.75)
-                            croped_image = image[ymin:ymax,xmin:xmax]
+                            croped_image = cv2.resize(image[ymin:ymax,xmin:xmax], (0, 0), fx=0.75, fy=0.75)
+                            # croped_image = image[ymin:ymax,xmin:xmax]
                             encodeings = face_recognition.face_encodings(croped_image)
                             if(len(encodeings) != 0):
                                 compare_result = face_recognition.face_distance(face, encodeings[0])
@@ -134,7 +140,8 @@ with mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence
                                     index = compare_result.index(min(compare_result))
                                     print(names[index], roll[index], reg[index])
 
-                                    
+                                    sname = names[index]
+                                    sroll = roll[index]
                                     try:
                                         present_file = open(f"{present_file_path}/{subject['teacher']}_{subject['subject']}_{subject['subject_code']}_{now[4]}_{now[1]}_{now[2]}_{now[0]}.pkl", 'rb') 
                                         lst = pickle.load(file=present_file)
@@ -146,7 +153,8 @@ with mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence
                                             break
                                     else:
                                         lst.append(f'{names[index]}_{roll[index]}_{reg[index]}_{now[3]}')
-                                        present_file_w = open(f"{present_file_path}/{subject['teacher']}_{subject['subject']}_{subject['subject_code']}_{now[4]}_{now[1]}_{now[2]}_{now[0]}.pkl", 'w+b')
+                                        print(present_file_path)
+                                        present_file_w = open(f"{present_file_path}/{subject['teacher']}_{subject['subject']}_{subject['subject_code']}_{now[5]}_{now[1]}_{now[3]}_{now[0]}.pkl", 'w+b')
                                         pickle.dump(file=present_file_w, obj= lst)
                                         present_file_w.close()
                                         print("successfully taken present")
@@ -158,6 +166,7 @@ with mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence
                                     error_file.write(error)
                                     error_file.close()
                             cv2.rectangle(img=image, pt1=(xmin, ymin), pt2=(xmax, ymax),color=(0, 255, 255), thickness=2 )
+                            cv2.putText(img=image, text= f"{sname}, {sroll}", org=  (xmin, ymin), color= (255, 255, 255), thickness= 1, fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale= 1)
                     cv2.imshow(f'{room}', image)
                     if cv2.waitKey(1) & 0xFF == ord("b"):
                         break

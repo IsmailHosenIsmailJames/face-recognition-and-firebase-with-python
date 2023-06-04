@@ -8,7 +8,7 @@ import firebase_admin
 from firebase_admin import credentials,firestore
 
 # initialize firebase server
-cd = credentials.Certificate("tpi-student-database-15c14-firebase-adminsdk-fkfla-12512f7f93.json")
+cd = credentials.Certificate("face-recognition-tpi-firebase-adminsdk-e9cby-d555dca55d.json")
 firebase_admin.initialize_app(cd)
 datab = firestore.client()
 usersref = datab.collection(u'all user')
